@@ -1,25 +1,37 @@
 use rand::Rng;
 
 pub struct Dice {
-    pub sides: u8
+    pub sides: u16
 }
 
 impl Dice {
-    pub fn roll(&self) -> u8 {
+    pub fn roll(&self) -> u16 {
         let mut rng = rand::thread_rng();
+        if self.sides <= 1 {
+            return 1;
+        }
         return rng.gen_range(1..self.sides);
     }
 }
 
 pub struct DiceRoll {
     pub dice_type: Dice,
-    pub dice_count: u8
+    pub dice_count: u16
 }
+
+fn str_to_int(s: &str, fallback: u16) -> u16 {
+    let num : u16 = match s.trim().parse() {
+        Ok(num) => num,
+        Err(_) => fallback
+    };
+    return num;
+}
+
 
 impl DiceRoll {
     pub fn roll(&self) {
         println!("{}w{}", self.dice_count, self.dice_type.sides);
-        let mut sum : u8 = 0;
+        let mut sum : u16 = 0;
         for _i in 0..self.dice_count {
             let role = &self.dice_type.roll();
             sum = sum + role;
@@ -28,19 +40,21 @@ impl DiceRoll {
         print!(" = {}\n", sum);
     }
 
+    fn split_by(to_parse: &String, s: &str) -> DiceRoll {
+        let d: Vec<&str> = to_parse.split(s).collect();
+        return DiceRoll { dice_type: Dice {sides: str_to_int(d[1], 6)}, dice_count: str_to_int(d[0], 1)};
+    }
+
     pub fn for_string(to_parse: &String) -> DiceRoll {
-        // TODO : THIS FUNCTION HAS TO BETTER CHECK THE INPUT
         if to_parse.is_empty() {
-            return DiceRoll { dice_type: Dice {sides: 6}, dice_count: 2};  // TODO error handling
+            return DiceRoll { dice_type: Dice {sides: 6}, dice_count: 2};  
         }
         if to_parse.contains("w") {
-            let d: Vec<&str> = to_parse.split("w").collect();
-            return DiceRoll { dice_type: Dice {sides: d[1].trim().parse().expect("not a number")}, dice_count: d[0].trim().parse().expect("not a number")};
+            return DiceRoll::split_by(to_parse, "w");
         } else if to_parse.contains("d") {
-            let d: Vec<&str> = to_parse.split("d").collect();
-            return DiceRoll { dice_type: Dice {sides: d[1].trim().parse().expect("not a number")}, dice_count: d[0].trim().parse().expect("not a number")};
+            return DiceRoll::split_by(to_parse, "d");
         } 
-        return DiceRoll { dice_type: Dice {sides: to_parse.trim().parse().expect("not a number")}, dice_count: 1};
+        return DiceRoll { dice_type: Dice {sides: str_to_int(to_parse, 6) }, dice_count: 1};
     }
 
 }
