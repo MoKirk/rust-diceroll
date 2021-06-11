@@ -30,7 +30,7 @@ fn str_to_int(s: &str, fallback: u16) -> u16 {
 
 impl DiceRoll {
     pub fn roll(&self) {
-        println!("{}w{}", self.dice_count, self.dice_type.sides);
+        println!("{}d{}", self.dice_count, self.dice_type.sides);
         let mut sum : u16 = 0;
         for _i in 0..self.dice_count {
             let role = &self.dice_type.roll();
